@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 from pathlib import Path
@@ -16,16 +17,42 @@ def load_categories(config_path: str | Path) -> dict[str, list[str]]:
     return categories or {}
 
 
-def classify_by_keyword(folder_name: str, categories: dict[str, list[str]]) -> str:
-    """Classify folder by case-insensitive substring match against keyword lists."""
-    folder_lower = folder_name.lower()
+def extract_metadata_category(folder_path: Path) -> str | None:
+    """Extract category from a .json file with a metadata.category field if present."""
+    for json_file in folder_path.glob("*.json"):
+        try:
+            with open(json_file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if isinstance(data, dict):
+                metadata = data.get("metadata")
+                if isinstance(metadata, dict) and metadata.get("category"):
+                    return str(metadata["category"])
+        except Exception:
+            continue
+    return None
+
+
+def classify_folder(folder_path: Path, categories: dict[str, list[str]]) -> tuple[str, str]:
+    """Classify a folder returning (category, method).
+
+    Method is one of: 'metadata', 'keyword', 'unmatched'
+    """
+    # 1. Prefer metadata.category from .json files
+    meta_cat = extract_metadata_category(folder_path)
+    if meta_cat:
+        return meta_cat, "metadata"
+
+    # 2. Fall back to keyword match on folder name
+    folder_lower = folder_path.name.lower()
     for category, keywords in categories.items():
         if not keywords:
             continue
         for keyword in keywords:
             if keyword.lower() in folder_lower:
-                return category
-    return "Other"
+                return category, "keyword"
+
+    # 3. Fall back to Other if unmatched
+    return "Other", "unmatched"
 
 
 def enumerate_folders(dataset_root: str | Path) -> list[Path]:
@@ -52,8 +79,8 @@ def main():
 
     print(f"Found {len(folders)} protocol folder(s) in '{dataset_root}'.")
     for folder in folders:
-        category = classify_by_keyword(folder.name, categories)
-        print(f"  {folder.name} -> {category}")
+        category, source = classify_folder(folder, categories)
+        print(f"  {folder.name} -> {category} [{source}]")
 
 
 if __name__ == "__main__":
