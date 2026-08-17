@@ -1,0 +1,8 @@
+manifest {
+    solution_a: "Buffer X"
+    solution_b: "Solvent Y"
+}
+
+instructions {
+    mix(solution_a, solution_b)
+}

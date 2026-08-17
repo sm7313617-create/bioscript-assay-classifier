@@ -1,0 +1,9 @@
+manifest {
+    sample: "Serum Sample"
+    reagent: "ELISA Substrate"
+}
+
+instructions {
+    dispense(sample, 50, "uL")
+    incubate(37, "C", 30, "min")
+}
