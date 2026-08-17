@@ -1,3 +1,4 @@
+import argparse
 import csv
 import json
 import os
@@ -111,27 +112,57 @@ def export_results(
     return summary_file, audit_file
 
 
+def parse_args(args=None):
+    """Parse command-line arguments."""
+    parser = argparse.ArgumentParser(
+        description="Classify BioScript protocol folders into assay-type categories."
+    )
+    parser.add_argument(
+        "dataset_root",
+        type=str,
+        help="Path to dataset root folder containing protocol subdirectories.",
+    )
+    parser.add_argument(
+        "-c",
+        "--config",
+        type=str,
+        default="config/categories.yaml",
+        help="Path to YAML category definitions (default: config/categories.yaml).",
+    )
+    parser.add_argument(
+        "-o",
+        "--output-dir",
+        type=str,
+        default="output",
+        help="Directory to save CSV outputs (default: output).",
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Print detailed classification per folder during execution.",
+    )
+    return parser.parse_args(args)
+
+
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: python src/classify.py <dataset_root> [config_path] [output_dir]")
-        sys.exit(1)
+    args = parse_args()
+    categories = load_categories(args.config)
+    folders = enumerate_folders(args.dataset_root)
 
-    dataset_root = sys.argv[1]
-    config_path = sys.argv[2] if len(sys.argv) > 2 else "config/categories.yaml"
-    output_dir = sys.argv[3] if len(sys.argv) > 3 else "output"
-
-    categories = load_categories(config_path)
-    folders = enumerate_folders(dataset_root)
-
-    print(f"Found {len(folders)} protocol folder(s) in '{dataset_root}'.")
+    print(f"Found {len(folders)} protocol folder(s) in '{args.dataset_root}'.")
     audit_records = []
     for folder in folders:
         category, source = classify_folder(folder, categories)
         audit_records.append({"folder_name": folder.name, "category": category, "source": source})
-        print(f"  {folder.name} -> {category} [{source}]")
+        if args.verbose:
+            print(f"  {folder.name} -> {category} [{source}]")
 
-    summary_file, audit_file = export_results(audit_records, output_dir=output_dir, categories=categories)
-    print(f"\nExported summary to: {summary_file}")
+    summary_file, audit_file = export_results(
+        audit_records, output_dir=args.output_dir, categories=categories
+    )
+    print(f"\nClassification complete.")
+    print(f"Exported summary to:     {summary_file}")
     print(f"Exported audit trail to: {audit_file}")
 
 

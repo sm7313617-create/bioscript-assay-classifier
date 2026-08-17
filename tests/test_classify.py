@@ -7,6 +7,7 @@ from src.classify import (
     extract_metadata_category,
     enumerate_folders,
     export_results,
+    parse_args,
 )
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
@@ -73,3 +74,11 @@ def test_export_results(tmp_path, categories):
     with open(summary_file, "r", encoding="utf-8") as f:
         reader = list(csv.reader(f))
         assert reader[0] == ["category", "count", "percent"]
+
+
+def test_parse_args():
+    args = parse_args(["my_dataset", "-c", "custom.yaml", "-o", "custom_out", "-v"])
+    assert args.dataset_root == "my_dataset"
+    assert args.config == "custom.yaml"
+    assert args.output_dir == "custom_out"
+    assert args.verbose is True
