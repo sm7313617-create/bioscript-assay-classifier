@@ -1,6 +1,5 @@
 __pycache__/
 *.pyc
-output/*.csv
 output/*.json
 .venv/
 .DS_Store

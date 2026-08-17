@@ -35,24 +35,44 @@ def extract_metadata_category(folder_path: Path) -> str | None:
     return None
 
 
+def normalize_category(raw_value: str, categories: dict[str, list[str]]) -> str | None:
+    """Map a raw string (from metadata or folder name) to one of the canonical categories."""
+    if not raw_value:
+        return None
+
+    # Check exact match with canonical category names (case-insensitive)
+    for canonical in categories.keys():
+        if raw_value.strip().lower() == canonical.lower():
+            return canonical
+
+    # Check substring match against keywords in categories config
+    raw_lower = raw_value.lower()
+    for canonical, keywords in categories.items():
+        if not keywords:
+            continue
+        for keyword in keywords:
+            if keyword.lower() in raw_lower:
+                return canonical
+
+    return None
+
+
 def classify_folder(folder_path: Path, categories: dict[str, list[str]]) -> tuple[str, str]:
     """Classify a folder returning (category, method).
 
     Method is one of: 'metadata', 'keyword', 'unmatched'
     """
-    # 1. Prefer metadata.category from .json files
-    meta_cat = extract_metadata_category(folder_path)
-    if meta_cat:
-        return meta_cat, "metadata"
+    # 1. Prefer metadata.category from .json files, normalized to canonical category
+    meta_raw = extract_metadata_category(folder_path)
+    if meta_raw:
+        normalized_cat = normalize_category(meta_raw, categories)
+        if normalized_cat and normalized_cat != "Other":
+            return normalized_cat, "metadata"
 
     # 2. Fall back to keyword match on folder name
-    folder_lower = folder_path.name.lower()
-    for category, keywords in categories.items():
-        if not keywords:
-            continue
-        for keyword in keywords:
-            if keyword.lower() in folder_lower:
-                return category, "keyword"
+    folder_cat = normalize_category(folder_path.name, categories)
+    if folder_cat and folder_cat != "Other":
+        return folder_cat, "keyword"
 
     # 3. Fall back to Other if unmatched
     return "Other", "unmatched"

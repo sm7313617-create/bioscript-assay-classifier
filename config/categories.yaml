@@ -1,36 +1,76 @@
 ELISA_Immunoassay:
   - elisa
   - immunoassay
+  - serology
+  - biomarker
   - tsh
   - hemagglutination
 Immunoprecipitation:
   - immunoprecipitation
   - magnetic_particle
 PCR_NucleicAcid:
+  - proxseq
+  - seq
+  - ngs
+  - scrna
+  - sequencing
+  - genotyping
+  - cloning
   - pcr
+  - amplification
   - nucleic_acid
   - zika
   - rubella
+  - denv
+  - ddpcr
 Extraction_Purification:
   - extraction
+  - purification
+  - isolation
+  - microfiltration
   - precipitation
   - monolith
+  - depletion
+  - spe
 Cell_Based_Assay:
-  - cell_culture
+  - nfkb
+  - organoid
+  - coculture
+  - microbiome
+  - electroporation
+  - transfection
+  - ctc
+  - cell_
   - apoptosis
+  - cell_culture
   - caspase
+  - macrophage
+  - single_cell
+  - immune
 Small_Molecule_Drug:
   - ciprofloxacin
   - fentanyl
   - glucose
   - estradiol
+  - heroin
+  - diazepam
+  - morphine
+  - oxycodone
+  - sorafenib
+  - steroid
+  - estrogen
 Omics_Proteomics:
-  - omics
   - proteomic
+  - proteomics
+  - microproteomics
+  - omics
+  - metabolomics
   - oxidoreductase
 Aerosol_Environmental:
   - aerosol
   - environmental
+  - monitoring
+  - sensing
 Dilution:
   - dilution
   - titration

@@ -5,6 +5,7 @@ from src.classify import (
     load_categories,
     classify_folder,
     extract_metadata_category,
+    normalize_category,
     enumerate_folders,
     export_results,
     parse_args,
@@ -22,8 +23,16 @@ def categories():
 def test_load_categories(categories):
     assert "ELISA_Immunoassay" in categories
     assert "PCR_NucleicAcid" in categories
+    assert "Cell_Based_Assay" in categories
     assert "Other" in categories
     assert "elisa" in categories["ELISA_Immunoassay"]
+
+
+def test_normalize_category(categories):
+    assert normalize_category("pcr_amplification_assay", categories) == "PCR_NucleicAcid"
+    assert normalize_category("single_cell_signalling_assay", categories) == "Cell_Based_Assay"
+    assert normalize_category("microproteomics_sample_preparation", categories) == "Omics_Proteomics"
+    assert normalize_category("completely_random_xyz", categories) is None
 
 
 def test_classify_elisa_keyword(categories):

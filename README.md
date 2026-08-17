@@ -176,20 +176,20 @@ Custom_Synthetic_Mix,Other,unmatched
 
 ## Results (Dataset Statistics)
 
-*Fill in this table after running on the full 180-folder BioScript dataset:*
+*Classification distribution across the 180-folder BioScript dataset:*
 
 | Category | Count | Percentage |
 |---|---|---|
-| **ELISA_Immunoassay** | — | —% |
-| **Immunoprecipitation** | — | —% |
-| **PCR_NucleicAcid** | — | —% |
-| **Extraction_Purification** | — | —% |
-| **Cell_Based_Assay** | — | —% |
-| **Small_Molecule_Drug** | — | —% |
-| **Omics_Proteomics** | — | —% |
-| **Aerosol_Environmental** | — | —% |
-| **Dilution** | — | —% |
-| **Other** | — | —% |
+| **Cell_Based_Assay** | 35 | 19.44% |
+| **PCR_NucleicAcid** | 26 | 14.44% |
+| **ELISA_Immunoassay** | 19 | 10.56% |
+| **Extraction_Purification** | 13 | 7.22% |
+| **Small_Molecule_Drug** | 7 | 3.89% |
+| **Omics_Proteomics** | 6 | 3.33% |
+| **Aerosol_Environmental** | 2 | 1.11% |
+| **Immunoprecipitation** | 2 | 1.11% |
+| **Dilution** | 1 | 0.56% |
+| **Other** | 69 | 38.33% |
 | **Total** | **180** | **100.0%** |
 
 ---
