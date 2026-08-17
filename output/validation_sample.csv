@@ -1,19 +1,19 @@
 folder_name,assigned_category,classification_source,correct_yn,correct_category_if_wrong,notes
-wang2025_macrophage_memory,Cell_Based_Assay,keyword,,,
-Diazepam,Small_Molecule_Drug,keyword,,,
-ahmadi_2024_mab_discovery,Other,unmatched,,,
-Jebrail_DMF_Proteomic_Processing,Omics_Proteomics,keyword,,,
-Human_Physiological_Fluids,Other,unmatched,,,
-Hemagglutination,ELISA_Immunoassay,keyword,,,
-Electrowetting_Realtime_Taqman_PCR,PCR_NucleicAcid,metadata,,,
-Determination_of_Flavonoid_Content,Other,unmatched,,,
-watterson_anaerobic_droplet_gut_microbiome,Cell_Based_Assay,keyword,,,
-schuster_organoid_drug_screening,Cell_Based_Assay,keyword,,,
-DBS_Succinylacetone,Other,unmatched,,,
-son_nfkb_stimulus_dynamics,Cell_Based_Assay,keyword,,,
-ng2012_dmf_immunoassay,ELISA_Immunoassay,keyword,,,
-albayrak_digital_pla_rtddpcr,PCR_NucleicAcid,keyword,,,
-Ahmadi_ML_DMF_18FFDG_ofat,Other,unmatched,,,
-deng2025_d2_droplet_digital_recovery,Other,unmatched,,,
-Glycosylation,Other,unmatched,,,
-Heroin,Small_Molecule_Drug,keyword,,,
+wang2025_macrophage_memory,Cell_Based_Assay,keyword,Y,,Textbook cell-based signaling assay
+Diazepam,Small_Molecule_Drug,keyword,Y,,"It's a reference document, not really an assay protocol — check if the .bs actually models a detection/quantification assay, or if this folder is just reference material that shouldn't be in the dataset at all"
+ahmadi_2024_mab_discovery,Other,unmatched,N,,"This is a cell-based single-cell screening platform (droplet encapsulation, cell sorting) with antibody assays inside. I'd call this Cell_Based_Assay, arguably borderline with ELISA_Immunoassay since the readout is antibody-binding — your call which fits your paper's framing better"
+Jebrail_DMF_Proteomic_Processing,Omics_Proteomics,keyword,Y,,Confirmed correct
+Human_Physiological_Fluids,Other,unmatched,Debatable,,"Doesn't cleanly fit any of your 10 buckets — not antibody-based, not PCR, not cell-based. Leaving it in Other is defensible, but if you want a Clinical_Diagnostics bucket this is a strong candidate for it"
+Hemagglutination,ELISA_Immunoassay,keyword,Y,,"Technically a distinct method from ELISA, but reasonably grouped under your ""immunoassay"" umbrella"
+Electrowetting_Realtime_Taqman_PCR,PCR_NucleicAcid,metadata,Y,,Unambiguous
+Determination_of_Flavonoid_Content,Other,unmatched,Y,,"Correctly unmatched — phytochemical colorimetric assay, no bucket fits"
+watterson_anaerobic_droplet_gut_microbiome,Cell_Based_Assay,keyword,Y,,"These are microbial (bacterial) cells, not mammalian — still ""cell-based"" in the general sense, but flag if your paper distinguishes mammalian cell assays from microbial culturing"
+schuster_organoid_drug_screening,Cell_Based_Assay,keyword,Y,,Unambiguous
+DBS_Succinylacetone,Other,unmatched,Debatable,,"Doesn't cleanly fit PCR/ELISA/proteomics — it's metabolite quantification via mass spec. ""Other"" is defensible unless you add a Clinical_Diagnostics/Newborn_Screening bucket, which several of your other folders (#5, this one, Multiplex_Newborn_Screening, Lysosomal_Storage_Disease) would also fit"
+son_nfkb_stimulus_dynamics,Cell_Based_Assay,keyword,Y,,Confirmed
+ng2012_dmf_immunoassay,ELISA_Immunoassay,keyword,Y,,Confirmed
+albayrak_digital_pla_rtddpcr,PCR_NucleicAcid,keyword,Y ,,"Genuinely hybrid — readout is ddPCR-based, so PCR bucket is the right primary call, but worth a footnote that it also does protein detection"
+Ahmadi_ML_DMF_18FFDG_ofat,Other,unmatched,Y,,Correctly falls outside all your assay buckets
+deng2025_d2_droplet_digital_recovery,Other,unmatched,N,,"This is a cell-based single-cell screening/sorting platform. ""D2"" in the name is a device name, not ""digital PCR"" — the keyword matcher likely got fooled by ""digital"" + ""d2"" pattern-matching toward PCR-adjacent terms, but it landed in Other so no harm done. Should be Cell_Based_Assay"
+Glycosylation,Other,unmatched,Debatable,,"Could argue Omics_Proteomics since it produces/characterizes glycoproteins, but it's really synthetic biology/biomanufacturing. ""Other"" is defensible"
+Heroin,Small_Molecule_Drug,keyword,N,,"Clear miss. The folder name matched the ""drug"" keyword bucket, but the actual assay technique is ELISA. Should be ELISA_Immunoassay"
