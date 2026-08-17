@@ -1,0 +1,37 @@
+ELISA_Immunoassay:
+  - elisa
+  - immunoassay
+  - tsh
+  - hemagglutination
+Immunoprecipitation:
+  - immunoprecipitation
+  - magnetic_particle
+PCR_NucleicAcid:
+  - pcr
+  - nucleic_acid
+  - zika
+  - rubella
+Extraction_Purification:
+  - extraction
+  - precipitation
+  - monolith
+Cell_Based_Assay:
+  - cell_culture
+  - apoptosis
+  - caspase
+Small_Molecule_Drug:
+  - ciprofloxacin
+  - fentanyl
+  - glucose
+  - estradiol
+Omics_Proteomics:
+  - omics
+  - proteomic
+  - oxidoreductase
+Aerosol_Environmental:
+  - aerosol
+  - environmental
+Dilution:
+  - dilution
+  - titration
+Other: []
