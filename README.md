@@ -213,10 +213,8 @@ The "Other" bucket was reduced from 69/180 (38.33%) down to 9/180 (5.00%). Rathe
 9. `watterson_anaerobic_droplet_cultivation`
 
 ### Validation Methodology & Accuracy
-To validate classification accuracy, a stratified random sample of $N=18$ protocol folders (10% of the dataset) was manually audited against ground-truth protocol definitions and scientific literature.
 
-- **Pre-Correction Automated Accuracy**: In the baseline automated run (prior to the addition of `overrides.yaml` and expanded categories), human-expert agreement was **13/18 (72.22%)**. This represents the reportable baseline accuracy of purely automated keyword and metadata heuristics.
-- **Post-Correction Accuracy**: Addressing the misclassifications discovered during validation via expanded categories and ground-truth overrides yields an accuracy of **18/18 (100%)** on the validation sample by construction.
+Manual validation on a random N=18 sample (10%) found the automated classifier (metadata + keyword rules only, before any manual overrides) correct in 13/18 cases (72.2% agreement). The 3 confirmed errors found during this review (`ahmadi_2024_mab_discovery`, `deng2025_d2_droplet_digital_recovery`, `Heroin`) were added to `config/overrides.yaml` as verified corrections; overrides account for 3/180 (1.7%) of final category assignments. The 72.2% figure, not a post-override number, represents the automated classifier's true accuracy.
 
 ---
 
