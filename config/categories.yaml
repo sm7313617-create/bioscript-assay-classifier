@@ -5,9 +5,11 @@ ELISA_Immunoassay:
   - biomarker
   - tsh
   - hemagglutination
+
 Immunoprecipitation:
   - immunoprecipitation
   - magnetic_particle
+
 PCR_NucleicAcid:
   - proxseq
   - seq
@@ -23,6 +25,7 @@ PCR_NucleicAcid:
   - rubella
   - denv
   - ddpcr
+
 Extraction_Purification:
   - extraction
   - purification
@@ -32,6 +35,7 @@ Extraction_Purification:
   - monolith
   - depletion
   - spe
+
 Cell_Based_Assay:
   - nfkb
   - organoid
@@ -47,6 +51,7 @@ Cell_Based_Assay:
   - macrophage
   - single_cell
   - immune
+
 Small_Molecule_Drug:
   - ciprofloxacin
   - fentanyl
@@ -59,6 +64,7 @@ Small_Molecule_Drug:
   - sorafenib
   - steroid
   - estrogen
+
 Omics_Proteomics:
   - proteomic
   - proteomics
@@ -66,12 +72,98 @@ Omics_Proteomics:
   - omics
   - metabolomics
   - oxidoreductase
+
 Aerosol_Environmental:
   - aerosol
   - environmental
   - monitoring
   - sensing
+
 Dilution:
   - dilution
   - titration
+
+Phytochemical_Colorimetric_Assay:
+  - flavonoid
+  - anthocyanin
+  - ascorbic_acid
+  - dpph
+  - phenolic
+  - soluble_sugar
+  - hydrogen_peroxide
+  - lipid_peroxide
+
+Clinical_Diagnostics_Newborn_Screening:
+  - succinylacetone
+  - newborn_screening
+  - lysosomal_storage
+  - physiological_fluids
+  - hepatotoxicity
+  - sars_cov2
+  - diagnostic_test
+  - explosive_detection
+  - tnt
+
+Enzyme_Kinetics_Screening:
+  - enzyme_assay
+  - ribozyme
+  - enzyme_screening
+  - enzymatic
+
+Synthetic_Biology_Genetic_Engineering:
+  - crispr
+  - electroporation
+  - electrotransformation
+  - transfection
+  - lentiviral
+  - competent_cells
+  - synbio
+  - strain_development
+
+Oncology_Cell_Pathology:
+  - breast_cancer
+  - deformability
+  - bacteremia
+  - malaria
+  - ctc
+  - liquid_biopsy
+  - cluster
+
+Device_Fabrication_Protocol_Formalization:
+  - fabrication
+  - ewod
+  - microbioreactor
+  - biology_protocols
+  - reciprocating
+  - evaporation_mgmt
+  - world_to_chip
+  - picoliter
+  - multilayer_hybrid
+  - droplet_on_tape
+  - droplet_volume_measurement
+
+RNA_Sequencing_Epigenomics:
+  - mirna
+  - proxseq
+  - paired_tag
+  - disc_dmf
+  - digital_recovery
+  - ev_mirna
+  - ecl_mirna
+
+Chemistry_Synthesis_Purification_MS:
+  - fucosylation
+  - glycosylation
+  - desalination
+  - concentrator
+  - peptidomimetics
+  - macrocycle
+  - mass_spec
+  - ief_cge
+  - id2m
+  - chemokine
+  - lipid_screen
+  - immunomodulator
+  - isoclone
+
 Other: []

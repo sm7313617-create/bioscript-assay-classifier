@@ -20,6 +20,17 @@ def load_categories(config_path: str | Path) -> dict[str, list[str]]:
     return categories or {}
 
 
+def load_overrides(config_path: str | Path = "config/overrides.yaml") -> dict[str, str]:
+    """Load manual overrides mapping folder names to categories from a YAML file."""
+    config_file = Path(config_path)
+    if not config_file.exists():
+        return {}
+
+    with open(config_file, "r", encoding="utf-8") as f:
+        overrides = yaml.safe_load(f)
+    return overrides or {}
+
+
 def extract_metadata_category(folder_path: Path) -> str | None:
     """Extract category from a .json file with a metadata.category field if present."""
     for json_file in folder_path.glob("*.json"):
@@ -57,24 +68,37 @@ def normalize_category(raw_value: str, categories: dict[str, list[str]]) -> str 
     return None
 
 
-def classify_folder(folder_path: Path, categories: dict[str, list[str]]) -> tuple[str, str]:
+def classify_folder(
+    folder_path: Path,
+    categories: dict[str, list[str]],
+    overrides: dict[str, str] | None = None,
+) -> tuple[str, str]:
     """Classify a folder returning (category, method).
 
-    Method is one of: 'metadata', 'keyword', 'unmatched'
+    Method is one of: 'override', 'metadata', 'keyword', 'unmatched'
+    Priority order:
+    1. config/overrides.yaml exact match (highest priority — verified ground truth)
+    2. metadata.category from the folder's .json file
+    3. keyword match against config/categories.yaml
+    4. Other (fallback)
     """
-    # 1. Prefer metadata.category from .json files, normalized to canonical category
+    # 1. Check manual overrides (ground truth)
+    if overrides and folder_path.name in overrides:
+        return overrides[folder_path.name], "override"
+
+    # 2. Prefer metadata.category from .json files, normalized to canonical category
     meta_raw = extract_metadata_category(folder_path)
     if meta_raw:
         normalized_cat = normalize_category(meta_raw, categories)
         if normalized_cat and normalized_cat != "Other":
             return normalized_cat, "metadata"
 
-    # 2. Fall back to keyword match on folder name
+    # 3. Fall back to keyword match on folder name
     folder_cat = normalize_category(folder_path.name, categories)
     if folder_cat and folder_cat != "Other":
         return folder_cat, "keyword"
 
-    # 3. Fall back to Other if unmatched
+    # 4. Fall back to Other if unmatched
     return "Other", "unmatched"
 
 
@@ -150,6 +174,12 @@ def parse_args(args=None):
         help="Path to YAML category definitions (default: config/categories.yaml).",
     )
     parser.add_argument(
+        "--overrides",
+        type=str,
+        default="config/overrides.yaml",
+        help="Path to YAML manual overrides (default: config/overrides.yaml).",
+    )
+    parser.add_argument(
         "-o",
         "--output-dir",
         type=str,
@@ -168,12 +198,13 @@ def parse_args(args=None):
 def main():
     args = parse_args()
     categories = load_categories(args.config)
+    overrides = load_overrides(args.overrides)
     folders = enumerate_folders(args.dataset_root)
 
     print(f"Found {len(folders)} protocol folder(s) in '{args.dataset_root}'.")
     audit_records = []
     for folder in folders:
-        category, source = classify_folder(folder, categories)
+        category, source = classify_folder(folder, categories, overrides=overrides)
         audit_records.append({"folder_name": folder.name, "category": category, "source": source})
         if args.verbose:
             print(f"  {folder.name} -> {category} [{source}]")
