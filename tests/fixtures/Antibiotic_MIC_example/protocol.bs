@@ -1,0 +1,8 @@
+manifest {
+    sample: "Bacterial Culture"
+    reagent: "Antibiotic MIC Screen Panel"
+}
+
+instructions {
+    dispense(sample, 100, "uL")
+}

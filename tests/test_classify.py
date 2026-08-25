@@ -39,8 +39,14 @@ def test_load_categories(categories):
     assert "Device_Fabrication_Protocol_Formalization" in categories
     assert "RNA_Sequencing_Epigenomics" in categories
     assert "Chemistry_Synthesis_Purification_MS" in categories
+    assert "Aptamer_Selection_SELEX" in categories
+    assert "Antimicrobial_Susceptibility_Testing" in categories
+    assert "CRISPR_Based_Diagnostics" in categories
     assert "Other" in categories
     assert "elisa" in categories["ELISA_Immunoassay"]
+    assert "selex" in categories["Aptamer_Selection_SELEX"]
+    assert "mic_screen" in categories["Antimicrobial_Susceptibility_Testing"]
+    assert "cas13" in categories["CRISPR_Based_Diagnostics"]
 
 
 def test_load_overrides(overrides):
@@ -54,6 +60,9 @@ def test_normalize_category(categories):
     assert normalize_category("single_cell_signalling_assay", categories) == "Cell_Based_Assay"
     assert normalize_category("microproteomics_sample_preparation", categories) == "Omics_Proteomics"
     assert normalize_category("flavonoid_content_analysis", categories) == "Phytochemical_Colorimetric_Assay"
+    assert normalize_category("aptamer_selection_assay", categories) == "Aptamer_Selection_SELEX"
+    assert normalize_category("antibiotic_mic_test", categories) == "Antimicrobial_Susceptibility_Testing"
+    assert normalize_category("crispr_diagnostic_detection", categories) == "CRISPR_Based_Diagnostics"
     assert normalize_category("completely_random_xyz", categories) is None
 
 
@@ -69,6 +78,27 @@ def test_classify_pcr_metadata(categories):
     category, source = classify_folder(pcr_folder, categories)
     assert category == "PCR_NucleicAcid"
     assert source == "metadata"
+
+
+def test_classify_selex_keyword(categories):
+    folder = FIXTURES_DIR / "SELEX_example"
+    category, source = classify_folder(folder, categories)
+    assert category == "Aptamer_Selection_SELEX"
+    assert source == "keyword"
+
+
+def test_classify_ast_keyword(categories):
+    folder = FIXTURES_DIR / "Antibiotic_MIC_example"
+    category, source = classify_folder(folder, categories)
+    assert category == "Antimicrobial_Susceptibility_Testing"
+    assert source == "keyword"
+
+
+def test_classify_crispr_keyword(categories):
+    folder = FIXTURES_DIR / "CRISPR_example"
+    category, source = classify_folder(folder, categories)
+    assert category == "CRISPR_Based_Diagnostics"
+    assert source == "keyword"
 
 
 def test_classify_override(categories):
@@ -92,6 +122,9 @@ def test_enumerate_fixtures():
     assert "ELISA_example" in folder_names
     assert "PCR_example" in folder_names
     assert "Other_example" in folder_names
+    assert "SELEX_example" in folder_names
+    assert "Antibiotic_MIC_example" in folder_names
+    assert "CRISPR_example" in folder_names
 
 
 def test_export_results(tmp_path, categories):

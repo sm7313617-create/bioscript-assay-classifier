@@ -1,0 +1,8 @@
+manifest {
+    sample: "Aptamer Library"
+    reagent: "SELEX Selection Buffer"
+}
+
+instructions {
+    dispense(sample, 20, "uL")
+}

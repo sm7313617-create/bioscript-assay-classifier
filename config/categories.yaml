@@ -10,6 +10,21 @@ Immunoprecipitation:
   - immunoprecipitation
   - magnetic_particle
 
+Aptamer_Selection_SELEX:
+  - selex
+  - aptamer
+
+Antimicrobial_Susceptibility_Testing:
+  - mic_screen
+  - antibiotic_mic
+  - susceptibility
+
+CRISPR_Based_Diagnostics:
+  - cas13
+  - crispr
+  - carmen
+  - isothermal_assay
+
 PCR_NucleicAcid:
   - proxseq
   - seq
@@ -25,6 +40,8 @@ PCR_NucleicAcid:
   - rubella
   - denv
   - ddpcr
+  - qpcr
+  - magnetofluidic
 
 Extraction_Purification:
   - extraction
@@ -119,6 +136,9 @@ Synthetic_Biology_Genetic_Engineering:
   - competent_cells
   - synbio
   - strain_development
+  - transformation
+  - mage
+  - crispr_mage
 
 Oncology_Cell_Pathology:
   - breast_cancer
@@ -150,6 +170,9 @@ RNA_Sequencing_Epigenomics:
   - digital_recovery
   - ev_mirna
   - ecl_mirna
+  - methylome
+  - bisulfite
+  - methylation
 
 Chemistry_Synthesis_Purification_MS:
   - fucosylation
@@ -165,5 +188,7 @@ Chemistry_Synthesis_Purification_MS:
   - lipid_screen
   - immunomodulator
   - isoclone
+  - conjugation
+  - entrap
 
 Other: []

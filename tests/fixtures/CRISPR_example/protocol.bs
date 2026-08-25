@@ -1,0 +1,8 @@
+manifest {
+    sample: "RNA Target"
+    reagent: "Cas13 CARMEN Detection Mix"
+}
+
+instructions {
+    dispense(sample, 10, "uL")
+}
