@@ -66,6 +66,31 @@ def test_normalize_category(categories):
     assert normalize_category("completely_random_xyz", categories) is None
 
 
+def test_negation_handling(categories):
+    assert normalize_category("digital_assay_no_amplification", categories) is None
+    assert normalize_category("non_amplification_protocol", categories) is None
+    assert normalize_category("without_amplification_assay", categories) is None
+    assert normalize_category("cell_free_protein_expression", categories) is None
+    assert normalize_category("amplification_assay", categories) == "PCR_NucleicAcid"
+
+
+def test_specificity_priority(categories):
+    # Specific category (RNA_Sequencing_Epigenomics via bisulfite) beats broad (PCR_NucleicAcid via nucleic_acid)
+    assert normalize_category("nucleic_acid_bisulfite_analysis", categories) == "RNA_Sequencing_Epigenomics"
+    # Specific category (Synthetic_Biology_Genetic_Engineering via transformation) beats broad (Cell_Based_Assay via cell_)
+    assert normalize_category("cell_transformation_expression_assay", categories) == "Synthetic_Biology_Genetic_Engineering"
+    # Specific category (RNA_Sequencing_Epigenomics via methylation) beats broad (Cell_Based_Assay via single_cell)
+    assert normalize_category("single_cell_methylation_screen", categories) == "RNA_Sequencing_Epigenomics"
+
+
+def test_conjugation_split(categories):
+    assert normalize_category("microbial_conjugation_assay", categories) == "Synthetic_Biology_Genetic_Engineering"
+    assert normalize_category("bacterial_conjugation", categories) == "Synthetic_Biology_Genetic_Engineering"
+    assert normalize_category("bioconjugation_reaction", categories) == "Chemistry_Synthesis_Purification_MS"
+    assert normalize_category("adc_conjugation", categories) == "Chemistry_Synthesis_Purification_MS"
+
+
+
 def test_classify_elisa_keyword(categories):
     elisa_folder = FIXTURES_DIR / "ELISA_example"
     category, source = classify_folder(elisa_folder, categories)

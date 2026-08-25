@@ -139,6 +139,9 @@ Synthetic_Biology_Genetic_Engineering:
   - transformation
   - mage
   - crispr_mage
+  - microbial_conjugation
+  - bacterial_conjugation
+  - conjugative
 
 Oncology_Cell_Pathology:
   - breast_cancer
@@ -188,7 +191,10 @@ Chemistry_Synthesis_Purification_MS:
   - lipid_screen
   - immunomodulator
   - isoclone
-  - conjugation
   - entrap
+  - bioconjugation
+  - adc_conjugation
+  - glycoconjugation
+  - chemical_conjugation
 
 Other: []

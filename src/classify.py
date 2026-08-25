@@ -7,6 +7,32 @@ from collections import Counter
 from pathlib import Path
 import yaml
 
+SPECIFIC_CATEGORIES = [
+    "RNA_Sequencing_Epigenomics",
+    "Synthetic_Biology_Genetic_Engineering",
+    "CRISPR_Based_Diagnostics",
+    "Aptamer_Selection_SELEX",
+    "Antimicrobial_Susceptibility_Testing",
+    "Clinical_Diagnostics_Newborn_Screening",
+    "Phytochemical_Colorimetric_Assay",
+    "Chemistry_Synthesis_Purification_MS",
+    "Oncology_Cell_Pathology",
+    "Enzyme_Kinetics_Screening",
+    "Device_Fabrication_Protocol_Formalization",
+]
+
+BROAD_CATEGORIES = [
+    "Cell_Based_Assay",
+    "PCR_NucleicAcid",
+    "ELISA_Immunoassay",
+    "Extraction_Purification",
+    "Omics_Proteomics",
+    "Small_Molecule_Drug",
+    "Immunoprecipitation",
+    "Aerosol_Environmental",
+    "Dilution",
+]
+
 
 def load_categories(config_path: str | Path) -> dict[str, list[str]]:
     """Load categories and their associated keywords from a YAML file."""
@@ -46,26 +72,87 @@ def extract_metadata_category(folder_path: Path) -> str | None:
     return None
 
 
-def normalize_category(raw_value: str, categories: dict[str, list[str]]) -> str | None:
-    """Map a raw string (from metadata or folder name) to one of the canonical categories."""
+def find_non_negated_match(raw_text: str, keyword: str) -> bool:
+    """Check whether keyword matches raw_text without being negated by prefixes/suffixes."""
+    if not raw_text or not keyword:
+        return False
+    raw_lower = raw_text.lower()
+    kw_lower = keyword.lower()
+    negation_prefixes = ("no_", "non_", "without_", "no-", "non-", "without-", "free_", "free-", "_free", "-free")
+    negation_suffixes = ("_free", "-free", "free_", "free-", "free")
+
+    start = 0
+    while True:
+        idx = raw_lower.find(kw_lower, start)
+        if idx == -1:
+            return False
+
+        is_negated = False
+        prefix_part = raw_lower[:idx]
+        for prefix in negation_prefixes:
+            if prefix_part.endswith(prefix):
+                is_negated = True
+                break
+
+        if not is_negated:
+            suffix_part = raw_lower[idx + len(kw_lower):]
+            if not suffix_part.startswith(("_free_radical", "-free-radical", "free_radical")):
+                for suffix in negation_suffixes:
+                    if suffix_part.startswith(suffix):
+                        is_negated = True
+                        break
+
+        if not is_negated:
+            return True
+
+        start = idx + 1
+
+
+def get_best_match(raw_value: str | None, categories: dict[str, list[str]]) -> dict | None:
+    """Find the best matching category for a raw string based on specificity and keyword length."""
     if not raw_value:
         return None
+    raw_lower = raw_value.strip().lower()
 
-    # Check exact match with canonical category names (case-insensitive)
+    # Exact match with canonical category names (case-insensitive)
     for canonical in categories.keys():
-        if raw_value.strip().lower() == canonical.lower():
-            return canonical
+        if raw_lower == canonical.lower():
+            is_spec = canonical in SPECIFIC_CATEGORIES
+            return {
+                "category": canonical,
+                "keyword": canonical,
+                "is_specific": is_spec,
+                "kw_len": len(canonical),
+            }
 
-    # Check substring match against keywords in categories config
-    raw_lower = raw_value.lower()
+    candidates = []
     for canonical, keywords in categories.items():
-        if not keywords:
+        if not keywords or canonical == "Other":
             continue
         for keyword in keywords:
-            if keyword.lower() in raw_lower:
-                return canonical
+            if find_non_negated_match(raw_lower, keyword):
+                is_spec = canonical in SPECIFIC_CATEGORIES
+                candidates.append({
+                    "category": canonical,
+                    "keyword": keyword,
+                    "is_specific": is_spec,
+                    "kw_len": len(keyword),
+                })
 
-    return None
+    if not candidates:
+        return None
+
+    # Ranking:
+    # 1. is_specific (Specific categories beat Broad categories)
+    # 2. kw_len (Longer, more specific keyword beats shorter keyword)
+    candidates.sort(key=lambda c: (1 if c["is_specific"] else 0, c["kw_len"]), reverse=True)
+    return candidates[0]
+
+
+def normalize_category(raw_value: str, categories: dict[str, list[str]]) -> str | None:
+    """Map a raw string (from metadata or folder name) to one of the canonical categories."""
+    best = get_best_match(raw_value, categories)
+    return best["category"] if best else None
 
 
 def classify_folder(
@@ -78,27 +165,38 @@ def classify_folder(
     Method is one of: 'override', 'metadata', 'keyword', 'unmatched'
     Priority order:
     1. config/overrides.yaml exact match (highest priority — verified ground truth)
-    2. metadata.category from the folder's .json file
-    3. keyword match against config/categories.yaml
-    4. Other (fallback)
+    2. Specific category match from metadata.category
+    3. Specific category match from folder name
+    4. Broad category match from metadata.category
+    5. Broad category match from folder name
+    6. Other (fallback)
     """
     # 1. Check manual overrides (ground truth)
     if overrides and folder_path.name in overrides:
         return overrides[folder_path.name], "override"
 
-    # 2. Prefer metadata.category from .json files, normalized to canonical category
+    # Evaluate matches from metadata and folder name
     meta_raw = extract_metadata_category(folder_path)
-    if meta_raw:
-        normalized_cat = normalize_category(meta_raw, categories)
-        if normalized_cat and normalized_cat != "Other":
-            return normalized_cat, "metadata"
+    meta_match = get_best_match(meta_raw, categories) if meta_raw else None
+    folder_match = get_best_match(folder_path.name, categories)
 
-    # 3. Fall back to keyword match on folder name
-    folder_cat = normalize_category(folder_path.name, categories)
-    if folder_cat and folder_cat != "Other":
-        return folder_cat, "keyword"
+    # 2. Specific metadata match
+    if meta_match and meta_match["is_specific"]:
+        return meta_match["category"], "metadata"
 
-    # 4. Fall back to Other if unmatched
+    # 3. Specific folder name match
+    if folder_match and folder_match["is_specific"]:
+        return folder_match["category"], "keyword"
+
+    # 4. Broad metadata match
+    if meta_match and meta_match["category"] != "Other":
+        return meta_match["category"], "metadata"
+
+    # 5. Broad folder name match
+    if folder_match and folder_match["category"] != "Other":
+        return folder_match["category"], "keyword"
+
+    # 6. Fall back to Other if unmatched
     return "Other", "unmatched"
 
 
