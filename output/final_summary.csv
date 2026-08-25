@@ -1,0 +1,13 @@
+category,count,percent
+Cell_Based_Assay,40,20.00%
+Immunoassay,30,15.00%
+Nucleic_Acid_Assay,25,12.50%
+Omics_Sequencing_Assay,18,9.00%
+Genetic_Engineering_Assay,16,8.00%
+Extraction_Sample_Prep_Assay,15,7.50%
+Device_Fabrication_Formalization,14,7.00%
+Chemical_Synthesis_Assay,11,5.50%
+Colorimetric_Biochemical_Assay,10,5.00%
+Clinical_Diagnostic_Assay,9,4.50%
+Enzyme_Assay,8,4.00%
+Other,4,2.00%
