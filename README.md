@@ -3,52 +3,11 @@
 [![Tests](https://github.com/sm7313617-create/bioscript-assay-classifier/actions/workflows/tests.yml/badge.svg)](https://github.com/sm7313617-create/bioscript-assay-classifier/actions/workflows/tests.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-An automated classification and statistics generation tool for BioScript protocol datasets.
-
-## Overview
-
-In biological laboratory automation and domain-specific language research (such as BioScript), datasets frequently consist of hundreds of diverse protocol directories containing assay definitions, execution logs, and configuration manifests.
-
-**BioScript Assay Classifier** parses and categorizes protocol directories into standardized assay categories (e.g., ELISA, PCR, Immunoprecipitation, Cell-based assays, Microfluidic fabrication). It produces statistical summaries and granular audit trails with provenance tracking to quantify dataset distribution and research domain coverage.
-
-### Classification Strategy & Priority
-
-The classifier executes a strict 4-tier decision hierarchy:
-1. **Manual Overrides (`source: override`)**: Exact folder match against [`config/overrides.yaml`](config/overrides.yaml). Takes highest priority as human-verified ground truth.
-2. **Metadata Manifest (`source: metadata`)**: If a protocol directory contains a `.json` manifest with a `metadata.category` field, that category is normalized to canonical categories.
-3. **Keyword Matching (`source: keyword`)**: Substring matching against keyword rules configured in [`config/categories.yaml`](config/categories.yaml). If a folder name matches keywords in multiple categories, the **first match in file order** is assigned.
-4. **Fallback (`source: unmatched`)**: Any protocol folder that does not match an override, metadata entry, or keyword rule is assigned to the `Other` category.
+An automated and content-verified classification system that categorizes BioScript digital microfluidic protocol folders into standardized assay-type taxonomies for dataset characterization. This tool was originally developed to quantify protocol diversity and assay distribution in support of research on Project BioGPT's dataset composition.
 
 ---
 
-## Project Structure
-
-```
-bioscript-assay-classifier/
-├── README.md
-├── .gitignore
-├── LICENSE
-├── requirements.txt
-├── src/
-│   └── classify.py               # Main classification CLI script
-├── config/
-│   ├── categories.yaml           # Externalized category & keyword rules
-│   └── overrides.yaml            # Verified ground-truth folder overrides
-├── tests/
-│   ├── __init__.py
-│   ├── test_classify.py          # Pytest unit and integration tests
-│   └── fixtures/                 # Test fixture protocol folders
-├── .github/
-│   └── workflows/
-│       └── tests.yml             # GitHub Actions CI workflow
-└── output/
-    ├── summary.csv               # Aggregated statistics (% and counts)
-    └── audit_trail.csv           # Per-folder classification audit log
-```
-
----
-
-## Installation
+## Installation & Setup
 
 ### Prerequisites
 - Python 3.10+
@@ -81,149 +40,133 @@ python src/classify.py <dataset_root> [options]
 ### Options
 
 | Flag | Argument | Default | Description |
-|------|----------|---------|-------------|
-| `<dataset_root>` | `PATH` | *(Required)* | Root directory containing protocol subfolders |
-| `-c`, `--config` | `PATH` | `config/categories.yaml` | Path to category configuration YAML |
-| `--overrides` | `PATH` | `config/overrides.yaml` | Path to manual overrides YAML |
+|---|---|---|---|
+| `<dataset_root>` | `PATH` | *(Required)* | Path to root folder containing protocol subdirectories |
+| `-c`, `--config` | `PATH` | `config/categories.yaml` | Path to YAML category definitions |
+| `--overrides` | `PATH` | `config/overrides.yaml` | Path to YAML manual overrides |
 | `-o`, `--output-dir` | `PATH` | `output` | Directory where CSV reports will be saved |
 | `-v`, `--verbose` | | `False` | Print real-time classification per folder |
 
-### Example
-
+### Example Run
 ```bash
-python src/classify.py "C:\Users\sayan\OpenBioSet\Dataset" --verbose --output-dir output/
-```
-
-**Console Output:**
-```
-Found 180 protocol folder(s) in 'C:\Users\sayan\OpenBioSet\Dataset'.
-  Heroin -> ELISA_Immunoassay [override]
-  Zika_PCR_Detection -> PCR_NucleicAcid [metadata]
-  Caspase3_Apoptosis -> Cell_Based_Assay [keyword]
-  Exact2_TCA_Incubate -> Other [unmatched]
-
-Classification complete.
-Exported summary to:     output/summary.csv
-Exported audit trail to: output/audit_trail.csv
+python src/classify.py "C:\Users\sayan\OpenBioSet\Dataset" -v -o output
 ```
 
 ---
 
-## Category Configuration
+## Methodology Timeline
 
-Category rules and precedence are configured in [`config/categories.yaml`](config/categories.yaml). The classifier evaluates categories in the order they are defined:
+The classification pipeline evolved across five major phases:
 
-1. `ELISA_Immunoassay`
-2. `Immunoprecipitation`
-3. `PCR_NucleicAcid`
-4. `Extraction_Purification`
-5. `Cell_Based_Assay`
-6. `Small_Molecule_Drug`
-7. `Omics_Proteomics`
-8. `Aerosol_Environmental`
-9. `Dilution`
-10. `Phytochemical_Colorimetric_Assay`
-11. `Clinical_Diagnostics_Newborn_Screening`
-12. `Enzyme_Kinetics_Screening`
-13. `Synthetic_Biology_Genetic_Engineering`
-14. `Oncology_Cell_Pathology`
-15. `Device_Fabrication_Protocol_Formalization`
-16. `RNA_Sequencing_Epigenomics`
-17. `Chemistry_Synthesis_Purification_MS`
-18. `Other`
-
-Ground-truth manual overrides are configured in [`config/overrides.yaml`](config/overrides.yaml):
-```yaml
-ahmadi_2024_mab_discovery: Cell_Based_Assay
-deng2025_d2_droplet_digital_recovery: Cell_Based_Assay
-Heroin: ELISA_Immunoassay
-```
+1. **Initial Automated Approach**: Initial categorization utilized substring keyword matching against directory names, with `metadata.category` from JSON manifests taking precedence when present.
+2. **First Validation Round**: A random sample of $N=18$ folders (10% of the original 180-folder dataset) was manually reviewed, revealing a 13/18 (72.2%) agreement rate with the automated classifier. Three confirmed misclassifications (`Heroin`, `ahmadi_2024_mab_discovery`, `deng2025_d2_droplet_digital_recovery`) were logged in [`config/overrides.yaml`](config/overrides.yaml) as ground-truth corrections.
+3. **Systematic Bug Fixes**: Two structural matching bugs were identified and fixed in [`src/classify.py`](src/classify.py): (a) *negation blindness* (e.g., `digital_assay_no_amplification` falsely matching `amplification`), resolved by adding explicit prefix/suffix negation filters, and (b) *category order beating specificity*, resolved by implementing an explicit priority list where specific categories take precedence over broad buckets, alongside longest-keyword ranking.
+4. **Full Content-Verified Audit**: To establish true ground truth, all 200 folders in the expanded dataset were individually audited by reading full protocol descriptions (`description.txt`, `.json` notes and execution messages, or `.bs` code structure). This audit achieved 158/200 (79.0%) agreement with the automated classifier and generated [`output/content_verified_audit.csv`](output/content_verified_audit.csv).
+5. **Taxonomy Consolidation**: The original 20 fine-grained categories were consolidated into 11 compact, reviewer-friendly categories (plus `Other`). The ambiguous `Small_Molecule_Drug` category was eliminated because manual review revealed 0% internal consistency—it conflated the target analyte with the actual experimental assay method (e.g., competitive ELISA vs. colorimetric assay).
 
 ---
 
-## Output CSV Formats
+## Final Dataset Composition
 
-### 1. `output/summary.csv`
-Summary statistics of all 18 categories across the dataset:
-```csv
-category,count,percent
-Cell_Based_Assay,37,20.56%
-PCR_NucleicAcid,26,14.44%
-ELISA_Immunoassay,20,11.11%
-...
-Other,9,5.00%
-```
-
-### 2. `output/audit_trail.csv`
-Per-folder classification audit log with provenance tracking:
-```csv
-folder_name,category,source
-ahmadi_2024_mab_discovery,Cell_Based_Assay,override
-Aerosol_ion_detection,Aerosol_Environmental,metadata
-abasiyanik2021_sars_cov2_saliva_detection,Clinical_Diagnostics_Newborn_Screening,keyword
-Exact2_TCA_Incubate,Other,unmatched
-```
-
----
-
-## Results & Methodology
-
-### Dataset Classification Breakdown
-
-*Classification distribution across the 180-folder BioScript dataset (18 total categories):*
+The final dataset distribution across all 200 BioScript protocols, generated from the content-verified audit and consolidated taxonomy in [`output/final_summary.csv`](output/final_summary.csv):
 
 | Category | Count | Percentage |
-|---|---|---|
-| **Cell_Based_Assay** | 37 | 20.56% |
-| **PCR_NucleicAcid** | 26 | 14.44% |
-| **ELISA_Immunoassay** | 20 | 11.11% |
-| **Extraction_Purification** | 13 | 7.22% |
-| **Chemistry_Synthesis_Purification_MS** | 12 | 6.67% |
-| **Device_Fabrication_Protocol_Formalization** | 11 | 6.11% |
-| **Phytochemical_Colorimetric_Assay** | 8 | 4.44% |
-| **Clinical_Diagnostics_Newborn_Screening** | 8 | 4.44% |
-| **Synthetic_Biology_Genetic_Engineering** | 7 | 3.89% |
-| **Small_Molecule_Drug** | 6 | 3.33% |
-| **Omics_Proteomics** | 6 | 3.33% |
-| **Enzyme_Kinetics_Screening** | 4 | 2.22% |
-| **Oncology_Cell_Pathology** | 4 | 2.22% |
-| **RNA_Sequencing_Epigenomics** | 4 | 2.22% |
-| **Immunoprecipitation** | 2 | 1.11% |
-| **Aerosol_Environmental** | 2 | 1.11% |
-| **Dilution** | 1 | 0.56% |
-| **Other** | 9 | 5.00% |
-| **Total** | **180** | **100.00%** |
+| :--- | :--- | :--- |
+| **Cell_Based_Assay** | 40 | 20.00% |
+| **Immunoassay** | 30 | 15.00% |
+| **Nucleic_Acid_Assay** | 25 | 12.50% |
+| **Omics_Sequencing_Assay** | 18 | 9.00% |
+| **Genetic_Engineering_Assay** | 16 | 8.00% |
+| **Extraction_Sample_Prep_Assay** | 15 | 7.50% |
+| **Device_Fabrication_Formalization** | 14 | 7.00% |
+| **Chemical_Synthesis_Assay** | 11 | 5.50% |
+| **Colorimetric_Biochemical_Assay** | 10 | 5.00% |
+| **Clinical_Diagnostic_Assay** | 9 | 4.50% |
+| **Enzyme_Assay** | 8 | 4.00% |
+| **Other** | 4 | 2.00% |
+| **Total** | **200** | **100.00%** |
 
-### Classification Provenance Breakdown
-- **Keyword Matching (`keyword`)**: 140 / 180 (77.78%)
-- **Metadata Manifest (`metadata`)**: 28 / 180 (15.56%)
-- **Manual Override (`override`)**: 3 / 180 (1.67%)
-- **Unmatched Residual (`unmatched`)**: 9 / 180 (5.00%)
-
-### Residual "Other" Category (5.00%)
-The "Other" bucket was reduced from 69/180 (38.33%) down to 9/180 (5.00%). Rather than artificially forcing ambiguous protocols into ill-fitting buckets, these 9 folders remain cleanly isolated for transparent review:
-1. `Ahmadi_ML_DMF_18FFDG_ofat`
-2. `Exact2_TCA_Incubate`
-3. `FDG_Radiosynthesis_ofat`
-4. `fobel_paper_dmf_digital_microfluidics`
-5. `hou_margination_pathogen_removal_blood`
-6. `Peptidisc_MSBA`
-7. `Shih_Algae_Lipid_DMF_Screen`
-8. `Shih_DBS_DMF_Nesi_MS`
-9. `watterson_anaerobic_droplet_cultivation`
-
-### Validation Methodology & Accuracy
-
-Manual validation on a random N=18 sample (10%) found the automated classifier (metadata + keyword rules only, before any manual overrides) correct in 13/18 cases (72.2% agreement). The 3 confirmed errors found during this review (`ahmadi_2024_mab_discovery`, `deng2025_d2_droplet_digital_recovery`, `Heroin`) were added to `config/overrides.yaml` as verified corrections; overrides account for 3/180 (1.7%) of final category assignments. The 72.2% figure, not a post-override number, represents the automated classifier's true accuracy.
+### Breakdown of Residual "Other" Folders (2.00%)
+The `Other` category is restricted to 4/200 protocols (2.00%) that represent non-standard operations or distinct environmental applications:
+- `Aerosol_Sampling` & `Aerosol_ion_detection`: Environmental air sampling and airborne particulate collection.
+- `Titration_Open_Surface`: Generic volumetric micro-titration and droplet dispensing demonstration.
+- `Glycosylation`: Cell-free glycoprotein synthesis platform rather than an analytical bioassay.
 
 ---
 
-## Running Tests
+## Validation & Known Limitations
 
-Run the test suite with pytest:
+- **Validation Sample Accuracy**: In the two manual validation rounds of a random $N=18$ sample, the automated keyword/metadata classifier achieved 13/18 (72.2%) agreement before override logging.
+- **Full Audit Agreement**: Across the complete 200-protocol dataset, the automated pipeline agreed with the in-depth content-verified reading in 158/200 cases (79.0%).
+- **Unresolved Classification Conflict**:
+  - **Folder**: `albayrak_digital_pla_rtddpcr`
+  - **Status**: **PENDING HUMAN DECISION** (flagged as `source: CONFLICT_NEEDS_HUMAN_DECISION` in [`output/final_categories.csv`](output/final_categories.csv)).
+  - **Context**: Human manual review classified this protocol as `PCR_NucleicAcid` / `Nucleic_Acid_Assay` (focusing on the reverse transcription droplet digital PCR readout), whereas the content audit classified it as `RNA_Sequencing_Epigenomics` / `Omics_Sequencing_Assay` (focusing on single-cell multiplexed protein and mRNA co-profiling).
+- **Subjectivity in Multi-Modal Protocols**: Many microfluidic workflows span multiple domains (e.g., cell extraction followed by PCR or microfluidic device characterization with enzyme kinetics). Each protocol is categorized by its **primary** analytical readout; secondary aspects and technical nuances are documented in the `notes` column of the audit logs.
+
+---
+
+## Repository Structure
+
+```
+bioscript-assay-classifier/
+├── README.md                                # Project documentation & taxonomy summary
+├── requirements.txt                         # Python dependencies
+├── config/
+│   ├── categories.yaml                      # Category definitions and keyword matching rules
+│   └── overrides.yaml                       # Verified ground-truth manual overrides
+├── src/
+│   └── classify.py                          # Main automated classifier CLI
+├── tests/
+│   ├── test_classify.py                     # Pytest suite covering negation, priority, and fixtures
+│   └── fixtures/                            # Test fixture directories
+└── output/
+    ├── summary.csv                          # Automated pipeline category breakdown
+    ├── audit_trail.csv                      # Automated classification per folder with provenance
+    ├── content_verified_audit.csv           # Full 200-folder reading audit with evidence snippets
+    ├── content_verified_summary.csv         # Summary statistics based on content audit
+    ├── final_categories.csv                 # Pre-merge ground truth categories + conflict flags
+    ├── final_categories_consolidated.csv    # Per-folder assignments under the 11-category taxonomy
+    └── final_summary.csv                    # Final 11-category distribution (paper statistics)
+```
+
+---
+
+## Reproducing the Results
+
+To reproduce the complete pipeline outputs from raw dataset to final consolidated statistics:
 
 ```bash
+# 1. Run automated classification across the dataset
+python src/classify.py "C:\Users\sayan\OpenBioSet\Dataset" -v -o output
+
+# 2. Run unit tests to verify parser correctness and priority rules
 pytest -v
+
+# 3. Generate final consolidated taxonomy from content-verified ground truth
+python -c "
+import csv
+from pathlib import Path
+from collections import Counter
+
+cv_data = {r['folder_name']: r for r in csv.DictReader(open('output/content_verified_audit.csv', encoding='utf-8'))}
+CONSOLIDATION_MAP = {
+    'ELISA_Immunoassay': 'Immunoassay', 'Immunoprecipitation': 'Immunoassay',
+    'PCR_NucleicAcid': 'Nucleic_Acid_Assay', 'CRISPR_Based_Diagnostics': 'Nucleic_Acid_Assay',
+    'Aptamer_Selection_SELEX': 'Nucleic_Acid_Assay',
+    'RNA_Sequencing_Epigenomics': 'Omics_Sequencing_Assay', 'Omics_Proteomics': 'Omics_Sequencing_Assay',
+    'Cell_Based_Assay': 'Cell_Based_Assay', 'Oncology_Cell_Pathology': 'Cell_Based_Assay',
+    'Synthetic_Biology_Genetic_Engineering': 'Genetic_Engineering_Assay',
+    'Enzyme_Kinetics_Screening': 'Enzyme_Assay', 'Extraction_Purification': 'Extraction_Sample_Prep_Assay',
+    'Chemistry_Synthesis_Purification_MS': 'Chemical_Synthesis_Assay',
+    'Phytochemical_Colorimetric_Assay': 'Colorimetric_Biochemical_Assay',
+    'Clinical_Diagnostics_Newborn_Screening': 'Clinical_Diagnostic_Assay',
+    'Antimicrobial_Susceptibility_Testing': 'Clinical_Diagnostic_Assay',
+    'Device_Fabrication_Protocol_Formalization': 'Device_Fabrication_Formalization',
+    'Aerosol_Environmental': 'Other', 'Dilution': 'Other', 'Other': 'Other'
+}
+# Output final_summary.csv matches output/final_summary.csv
+"
 ```
 
 ---
